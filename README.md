@@ -70,8 +70,11 @@ This is a decentralized dice game built using React, Ethers.js, and Wagmi. Playe
 ## How the App Works
 
 Watch the demo video to see how the app works:
+
 [🎥 Watch Demo Video](https://www.youtube.com/watch?v=gKonuaEI8po)
+
 or
+
 Find video in Resources folder
 
 ### Game Rules
