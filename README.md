@@ -1,5 +1,8 @@
 # Dice Game - React App
 
+![Thumbnail](https://github.com/mari0-0/web3-dice-game/blob/main/resources/thumbnail.PNG?raw=true)
+
+
 This is a decentralized dice game built using React, Ethers.js, and Wagmi. Players can place bets, roll the dice, and win or lose based on the outcome. The game is deployed on multiple testnets, and transactions can be verified on their respective blockchain explorers.
 
 ---
@@ -66,11 +69,10 @@ This is a decentralized dice game built using React, Ethers.js, and Wagmi. Playe
 
 ## How the App Works
 
-[🎥 Watch Demo Video](./resources/demo.mp4)
-
 Watch the demo video to see how the app works:
-
-[![Demo Video](https://img.youtube.com/vi/gKonuaEI8po/0.jpg)](https://www.youtube.com/watch?v=gKonuaEI8po)
+[🎥 Watch Demo Video](https://www.youtube.com/watch?v=gKonuaEI8po)
+or
+Find video in Resources folder
 
 ### Game Rules
 1. **Place a Bet**:
