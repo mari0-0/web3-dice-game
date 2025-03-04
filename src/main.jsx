@@ -1,15 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.jsx";
 import { ThemeProvider } from "./components/theme-provider";
-import "@rainbow-me/rainbowkit/styles.css";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
 import {
   getDefaultConfig,
   RainbowKitProvider,
   darkTheme,
 } from "@rainbow-me/rainbowkit";
-import { WagmiProvider } from "wagmi";
 import {
   baseSepolia,
   optimismSepolia,
@@ -17,11 +15,13 @@ import {
   sepolia,
   holesky,
 } from "wagmi/chains";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import App from "./App.jsx";
+import "./index.css";
+import "@rainbow-me/rainbowkit/styles.css";
 
 const queryClient = new QueryClient();
 const config = getDefaultConfig({
-  appName: "My RainbowKit App",
+  appName: "Web-3 Dice Game",
   projectId: "YOUR_PROJECT_ID",
   chains: [sepolia, optimismSepolia, arbitrumSepolia, baseSepolia, holesky],
 });
