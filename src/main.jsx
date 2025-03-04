@@ -16,6 +16,7 @@ import {
   arbitrumSepolia,
   polygonAmoy,
   sepolia,
+  holesky,
 } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
@@ -23,7 +24,7 @@ const queryClient = new QueryClient();
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
   projectId: "YOUR_PROJECT_ID",
-  chains: [sepolia, polygonAmoy, optimismSepolia, arbitrumSepolia, baseSepolia],
+  chains: [sepolia, polygonAmoy, optimismSepolia, arbitrumSepolia, baseSepolia, holesky],
 });
 
 createRoot(document.getElementById("root")).render(

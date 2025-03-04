@@ -1,17 +1,73 @@
-import { useState } from "react";
-import { CircleDollarSign, Dices, Percent } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CircleDollarSign, Dices, Loader2, Percent } from "lucide-react";
 import { ScrollArea, ScrollBar } from "./components/ui/scroll-area";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useBalance } from "wagmi";
+import { contractABI, contractAddresses } from "@/data";
+import { ethers } from "ethers";
+
+
+const CONTRACT_ADDRESS = contractAddresses.sepolia;
+const CONTRACT_ABI = contractABI
 
 export default function App() {
   const account = useAccount();
   const balanceObj = useBalance({
     address: account.address,
   });
-  const balance = parseFloat(Number(balanceObj.data.value) / 10 ** 9);
+  const [balance, setBalance] = useState(null)
   const [betAmount, setBetAmount] = useState(0);
   const [profitOnWin, setProfitOnWin] = useState(0);
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (balanceObj.isFetched) {
+      setBalance(parseFloat(Number(balanceObj.data.value) / 10 ** 9));
+    }
+  }, [balanceObj])
+
+  const placeBet = async () => {
+    if (!window.ethereum) return alert("Please install MetaMask!");
+    if (!betAmount || betAmount <= 0) return alert("Enter a valid bet amount!");
+
+    setIsLoading(true)
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      const tx = await contract.placeBet({
+        value: ethers.parseUnits(betAmount.toString(), "gwei"),
+      });
+
+      console.log("Transaction Sent! Hash:", tx.hash);
+      // alert(`Transaction sent! Hash: ${tx.hash}`);
+
+      const receipt = await tx.wait(); // Wait for the transaction to be mined
+      console.log("Transaction Confirmed!", receipt);
+
+      // Extract logs from events
+      receipt.logs.forEach((log) => {
+        try {
+          const parsedLog = contract.interface.parseLog(log);
+          if (parsedLog.name === "BetPlaced") {
+            console.log(`BetPlaced: Player=${parsedLog.args.player}, Amount=${parsedLog.args.betAmount}`);
+          }
+          if (parsedLog.name === "DiceRolled") {
+            console.log(`DiceRolled: Player=${parsedLog.args.player}, Result=${parsedLog.args.result}, Win=${parsedLog.args.win}`);
+            alert(`Dice Roll: ${parsedLog.args.result} | ${parsedLog.args.win ? "You won!" : "You lost!"}`);
+          }
+        } catch (error) {
+          console.log("Log parsing error:", error);
+        }
+      });
+      balanceObj.refetch()
+    } catch (error) {
+      console.error("Bet placement failed:", error);
+      alert("Transaction failed!");
+    }
+    setIsLoading(false)
+  };
 
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-slate-900 text-white">
@@ -45,7 +101,7 @@ export default function App() {
           <div className="flex justify-between mb-2">
             <label className="text-gray-400">Bet Amount</label>
             <span className="text-gray-400 flex gap-1 items-center">
-              <CircleDollarSign size={20} /> {balance.toFixed(2)} Gwei
+              <CircleDollarSign size={20} /> {balance ? balance.toFixed(2) : '0'} Gwei
             </span>
           </div>
           <div className="flex">
@@ -97,20 +153,17 @@ export default function App() {
 
         {/* Bet Button */}
         <button
-          className={`w-full py-4 ${
-            account.isConnecting ||
-            account.isDisconnected ||
-            account.isReconnecting
-              ? "bg-green-600"
-              : "bg-green-500 cursor-pointer"
-          } hover:bg-green-600 text-black font-medium rounded-md transition-all`}
-          disabled={
-            account.isConnecting ||
-            account.isDisconnected ||
-            account.isReconnecting
-          }
+          onClick={placeBet}
+          className="w-full py-4 bg-green-500 hover:bg-green-600 text-black font-medium rounded-md transition-all"
+          disabled={!account.isConnected || betAmount <= 0}
         >
-          Bet
+          {isLoading 
+          ? (
+            <div className="w-full h-full flex justify-center items-center text-white">
+              <Loader2 className="animate-spin" />
+            </div>) 
+            :
+            'Bet'}
         </button>
 
         <div className="mt-12 w-full flex flex-col gap-6">
