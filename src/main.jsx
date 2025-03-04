@@ -14,7 +14,6 @@ import {
   baseSepolia,
   optimismSepolia,
   arbitrumSepolia,
-  polygonAmoy,
   sepolia,
   holesky,
 } from "wagmi/chains";
@@ -24,7 +23,7 @@ const queryClient = new QueryClient();
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
   projectId: "YOUR_PROJECT_ID",
-  chains: [sepolia, polygonAmoy, optimismSepolia, arbitrumSepolia, baseSepolia, holesky],
+  chains: [sepolia, optimismSepolia, arbitrumSepolia, baseSepolia, holesky],
 });
 
 createRoot(document.getElementById("root")).render(

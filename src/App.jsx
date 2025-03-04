@@ -2,13 +2,10 @@ import { useEffect, useState } from "react";
 import { CircleDollarSign, Dices, Loader2, Percent } from "lucide-react";
 import { ScrollArea, ScrollBar } from "./components/ui/scroll-area";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount, useBalance, useChains } from "wagmi";
 import { contractABI, contractAddresses } from "@/data";
 import { ethers } from "ethers";
 
-
-const CONTRACT_ADDRESS = contractAddresses.sepolia;
-const CONTRACT_ABI = contractABI
 
 export default function App() {
   const account = useAccount();
@@ -19,6 +16,18 @@ export default function App() {
   const [betAmount, setBetAmount] = useState(0);
   const [profitOnWin, setProfitOnWin] = useState(0);
   const [isLoading, setIsLoading] = useState(false)
+  const [activeChain, setActiveChain] = useState("sepolia");
+  const chains = useChains()
+  const [contractAddress, setContractAddress] = useState(
+    contractAddresses.sepolia
+  );
+
+
+  const handleBlockchainChange = (event) => {
+    const selectedChain = event.target.value;
+    setActiveChain(selectedChain);
+    setContractAddress(contractAddresses[selectedChain]);
+  };
 
   useEffect(() => {
     if (balanceObj.isFetched) {
@@ -34,7 +43,7 @@ export default function App() {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
       const tx = await contract.placeBet({
         value: ethers.parseUnits(betAmount.toString(), "gwei"),
@@ -69,6 +78,8 @@ export default function App() {
     setIsLoading(false)
   };
 
+  console.log(account.chain.id, activeChain)
+
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-slate-900 text-white">
       {/* Left Panel */}
@@ -82,16 +93,20 @@ export default function App() {
             <label className="text-gray-400">Blockchain</label>
           </div>
           <div className="flex pr-4 bg-slate-900 rounded-md border border-slate-600">
-            <select className="w-full px-3 py-3 rounded-md outline-none  text-white bg-slate-900">
-              <option className="bg-slate-800 text-white" value="option1">
-                Sepolia
-              </option>
-              <option className="bg-slate-800 text-white" value="option2">
-                Gorelia
-              </option>
-              <option className="bg-slate-800 text-white" value="option3">
-                Polygon
-              </option>
+            <select
+              value={activeChain}
+              onChange={handleBlockchainChange}
+              className="w-full px-3 py-3 rounded-md outline-none text-white bg-slate-900"
+            >
+              {chains.map((chain) => (
+                <option
+                  key={chain.id}
+                  value={chain.id}
+                  className="bg-slate-800 text-white"
+                >
+                  {chain.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -154,16 +169,18 @@ export default function App() {
         {/* Bet Button */}
         <button
           onClick={placeBet}
-          className="w-full py-4 bg-green-500 hover:bg-green-600 text-black font-medium rounded-md transition-all"
+          className={`w-full py-4 ${!account.isConnected || betAmount <= 0 ? "bg-green-600 " : "bg-green-500 cursor-pointer "}  hover:bg-green-600 text-black font-medium rounded-md transition-all`}
           disabled={!account.isConnected || betAmount <= 0}
         >
-          {isLoading 
-          ? (
-            <div className="w-full h-full flex justify-center items-center text-white">
-              <Loader2 className="animate-spin" />
-            </div>) 
-            :
-            'Bet'}
+          {isLoading
+            ? (
+              <div className="w-full h-full flex justify-center items-center text-white">
+                <Loader2 className="animate-spin" />
+              </div>)
+            : (
+              activeChain == account.chain.id ?
+                'Bet' : "change the chain"
+            )}
         </button>
 
         <div className="mt-12 w-full flex flex-col gap-6">
